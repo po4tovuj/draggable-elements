@@ -1,0 +1,15 @@
+@mixin tablet-screen {
+  @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (-webkit-min-device-pixel-ratio: 1) {
+    @content;
+  }
+}
+@mixin small-laptop {
+  @media only screen and (min-device-width: 992px) and (max-device-width: 1200px) {
+    @content;
+  }
+}
+@mixin large-screen {
+  @media screen and (min-device-width: 1200px) and (-webkit-min-device-pixel-ratio: 1) {
+    @content;
+  }
+}
