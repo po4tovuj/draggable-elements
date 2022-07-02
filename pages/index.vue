@@ -26,11 +26,13 @@ export default {
     // if (from.path) {
     //   return
     // }
-    // if (areAlbumsLoaded) {
-    //   return
-    // }
-    await store.dispatch('photo/getAlbums')
-    await store.dispatch('photo/getPhotos')
+    if (store.state.photo.albums.length) {
+      return
+    }
+    await Promise.allSettled([
+      store.dispatch('photo/getAlbums'),
+      store.dispatch('photo/getPhotos'),
+    ])
     return {}
   },
   // activated() {

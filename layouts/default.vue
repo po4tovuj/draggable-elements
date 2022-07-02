@@ -1,35 +1,40 @@
 <template>
   <div>
-    <nav
-      class="navbar header has-shadow is-primary"
-      role="navigation"
-      aria-label="main navigation"
-    >
-      <div class="navbar-brand">
-        <a class="navbar-item" href="/">
-          <img src="~assets/buefy.png" alt="Buefy" height="28" />
-        </a>
-
-        <div class="navbar-burger">
-          <span />
-          <span />
-          <span />
+    <header class="header">
+      <nav
+        class="navbar has-shadow is-primary"
+        role="navigation"
+        aria-label="main navigation"
+      >
+        <div class="navbar-brand">
+          <a class="navbar-item" href="/">
+            <img src="~assets/buefy.png" alt="Buefy" height="28" />
+          </a>
         </div>
-      </div>
-    </nav>
-
-    <section class="main-content columns">
-      <aside class="column is-2 section">
-        <p class="menu-label is-hidden-touch">General</p>
-        <ul class="menu-list">
-          <li v-for="(item, key) of items" :key="key">
-            <NuxtLink :to="item.to" exact-active-class="is-active">
-              <b-icon :icon="item.icon" /> {{ item.title }}
+        <ul class="nav-link-list">
+          <li>
+            <NuxtLink
+              exact
+              to="/"
+              class="nav-link"
+              active-class="nav-link--active"
+            >
+              <b-icon icon="home" /> Home
+            </NuxtLink>
+          </li>
+          <li>
+            <NuxtLink
+              to="/albums"
+              class="nav-link"
+              active-class="nav-link--active"
+            >
+              <b-icon icon="folder-multiple-image" /> Albums
             </NuxtLink>
           </li>
         </ul>
-      </aside>
-
+      </nav>
+    </header>
+    <section class="main-content columns">
       <div class="container column is-10">
         <Nuxt />
       </div>
@@ -53,3 +58,19 @@ export default {
   },
 }
 </script>
+<style lang="scss">
+.header {
+  .navbar {
+    padding: 0 20px;
+  }
+  .nav-link-list {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    .nav-link {
+      color: white;
+      font-size: 20px;
+    }
+  }
+}
+</style>
