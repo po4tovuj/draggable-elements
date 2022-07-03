@@ -19,28 +19,16 @@ export default {
     PhotosList,
     AlbumsList,
   },
-  activated() {
-    console.log(this.$fetchState)
-  },
+
   async fetch({ store, route }) {
-    // if (from.path) {
-    //   return
-    // }
-    if (store.state.photo.albums.length) {
-      return
+    if (!store.state.photo.albums.length) {
+      await store.dispatch('photo/getAlbums')
     }
-    await Promise.allSettled([
-      store.dispatch('photo/getAlbums'),
-      store.dispatch('photo/getPhotos'),
-    ])
-    return {}
+
+    if (!store.state.photo.photos.length) {
+      await store.dispatch('photo/getPhotos')
+    }
   },
-  // activated() {
-  //   // Call fetch again if last fetch more than 30 sec ago
-  //   // if (this.$fetchState.timestamp <= Date.now() - 10000) {
-  //   this.$fetch()
-  //   // }
-  // },
 
   computed: {
     ...mapGetters({

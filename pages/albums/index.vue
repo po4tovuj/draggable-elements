@@ -1,28 +1,26 @@
 <template>
   <div>
-    <ul class="album-list">
-      <li v-for="album in albumList" :key="album.id" class="album-list__item">
-        <card class="album" :title="album.title">
-          <template #default>
-            <photos-list
-              :album-photo-list="album.photos"
-              :is-in-albums="true"
-            ></photos-list>
-          </template>
-        </card>
-      </li>
-    </ul>
+    <AlbumsList :home-page="false" />
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import Card from '~/components/Card.vue'
-import PhotosList from '~/components/PhotosList.vue'
+// import Card from '~/components/Card.vue'
+// import PhotosList from '~/components/PhotosList.vue'
+import AlbumsList from '~/components/AlbumsList.vue'
 
 export default {
-  components: { Card, PhotosList },
-
+  components: {
+    // Card, PhotosList,
+    AlbumsList,
+  },
+  async fetch({ store, route }) {
+    if (store.state.photo.albums.length) {
+      return
+    }
+    await store.dispatch('photo/getAlbums')
+  },
   data() {
     return {}
   },
@@ -37,18 +35,22 @@ export default {
 <style lang="scss">
 .album-list {
   grid-template-columns: repeat(auto-fill, minmax(40%, 1fr));
+
+  .photo-list {
+    grid-template-columns: repeat(auto-fit, minmax(40%, 45%));
+    grid-auto-flow: row;
+  }
+
   .album {
-    .photo-list {
-      grid-template-columns: repeat(auto-fit, minmax(40%, 45%));
-      grid-auto-flow: row;
-    }
     .photo {
       .b-image-wrapper {
-        min-width: 70px;
+        width: 70px;
       }
-      &__title {
-        display: block;
-      }
+    }
+    .photo__title {
+      display: block !important;
+      margin-left: 20px;
+      font-size: 18px;
     }
   }
 }

@@ -7,7 +7,7 @@
       <slot name="header"></slot>
     </header>
     <div class="card-content">
-      <slot :photo-list="photoList"> some text </slot>
+      <slot name="body"> </slot>
     </div>
   </div>
 </template>
@@ -20,16 +20,21 @@ export default {
       type: String,
       default: '',
     },
-    albumId: {
-      type: Number,
-      default: 0,
+    photoList: {
+      type: Array,
+      default: null,
     },
   },
-  computed: {
-    photoList() {
-      return this.$store.getters['photo/getAlbumPhoto'](this.albumId)
-    },
-  },
+  computed: {},
 }
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.card-header {
+  display: flex;
+  align-items: center;
+  padding: 0 1em;
+  .card-title {
+    padding-left: 0;
+  }
+}
+</style>

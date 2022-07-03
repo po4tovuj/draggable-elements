@@ -5,6 +5,7 @@
       tag="ul"
       :group="outerDragOptions"
       class="album-list"
+      :class="{ 'album-list--column': !homePage }"
     >
       <li
         v-for="el in albums"
@@ -18,22 +19,17 @@
               <b-button>Open</b-button>
             </nuxt-link>
           </template>
-          <template #default>
+          <template #body>
             <draggable
               class="photo-list"
               :data-album-id="el.id"
-              :v-model="el.photos"
               tag="ul"
               :group="innerDragOptions"
               @end="onEnd"
               @change="(e) => handleChange({ e, albumId: el.id })"
             >
               <li class="photo-list__item drop-zone-area">
-                <button type="button" class="drop-btn" outlined>
-                  <svg class="drop-icon" width="20" height="20">
-                    <use href="~assets/icons/icons.svg#plus"></use>
-                  </svg>
-                </button>
+                <drop-down-btn @cb="openModal(el.id, el.title)"></drop-down-btn>
               </li>
               <li
                 v-for="(photo, idx) in el.photos.slice(0, 8)"
@@ -41,7 +37,11 @@
                 :data-photo-id="photo.id"
                 class="photo-list__item"
               >
-                <nuxt-link :to="`/${el.id}`" v-if="idx >= 7" class="empty-box">
+                <nuxt-link
+                  v-if="idx >= 7"
+                  :to="`albums/${el.id}`"
+                  class="empty-box"
+                >
                   <p>....</p>
                 </nuxt-link>
                 <PhotoCard v-if="idx < 7" v-bind="photo" />
@@ -51,21 +51,47 @@
         </Card>
       </li>
     </draggable>
-    <!-- <PhotosList></PhotosList> -->
+    <b-modal
+      v-model="showModal"
+      :can-cancel="false"
+      trap-focus
+      :destroy-on-hide="true"
+      aria-role="dialog"
+      aria-label="Add photo to the album"
+      aria-modal
+      scroll="clip"
+    >
+      <template #default>
+        <photo-modal :cb="handleAddPhoto" v-bind="addModal"></photo-modal>
+      </template>
+    </b-modal>
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import DropDownBtn from './dropDownBtn.vue'
 import PhotoCard from './PhotoCard.vue'
+import PhotoModal from './modals/photoModal.vue'
 
 export default {
   name: 'AlbumsList',
 
-  components: { PhotoCard },
-
+  components: { PhotoCard, DropDownBtn, PhotoModal },
+  props: {
+    homePage: {
+      type: Boolean,
+      default: true,
+    },
+  },
   data() {
     return {
+      showModal: false,
+      addModal: {
+        unsortedList: [],
+        albumId: null,
+        selectedPhoto: [],
+      },
       albums: [],
       outerDragOptions: {
         name: 'g1',
@@ -81,7 +107,7 @@ export default {
   computed: {
     ...mapGetters({
       albumsList: 'photo/getAlbums',
-      photoList: 'photo/getPhotos',
+      unsortedList: 'photo/getUnsorted',
     }),
     contents: {
       get() {
@@ -100,9 +126,27 @@ export default {
       updateAlbums: 'photo/updateAlbums',
       movePhoto: 'photo/movePhoto',
       sortPhotoInAlbum: 'photo/sortPhotoInAlbum',
+      addPhotoToAlbum: 'photo/addPhotoToAlbum',
     }),
-    goTo(albumId) {
-      console.log('albumId: ', albumId)
+
+    openModal(id, title) {
+      this.addModal = {
+        album: {
+          albumId: id,
+          title,
+        },
+        unsortedList: this.unsortedList,
+      }
+
+      this.showModal = true
+    },
+    handleAddPhoto({ albumId, selectedPhoto }) {
+      console.log('selectedPhoto: ', this.addModal.album.albumId)
+      this.showModal = false
+      this.addPhotoToAlbum({
+        albumId: this.addModal.album.albumId,
+        photos: selectedPhoto,
+      })
     },
     handleChange({ e: { moved, removed }, albumId }) {
       if (removed) return false
@@ -126,11 +170,14 @@ export default {
   },
 }
 </script>
-<style lang="scss">
-.album-list {
+<style lang="scss" scoped>
+.album-list:deep {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   grid-gap: 20px;
+  &.album-list--column {
+    grid-template-columns: 1fr;
+  }
   .album-wrapper {
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.12), 0px 1px 1px rgba(0, 0, 0, 0.14),
       0px 2px 1px rgba(0, 0, 0, 0.2);
@@ -155,7 +202,9 @@ export default {
       justify-content: center;
       grid-row: 1;
       grid-column: 1 / 5;
+      cursor: pointer;
       .drop-btn {
+        cursor: pointer;
         border-radius: 50%;
         font-size: 20px;
         width: 40px;
@@ -206,35 +255,12 @@ export default {
       align-items: center;
 
       .b-image-wrapper {
-        width: 60px;
+        // width: 60px;
+      }
+      &__title {
+        display: none;
       }
     }
-    .photo__title {
-      display: none;
-      margin-left: 20px;
-      font-size: 18px;
-    }
   }
-}
-.minH {
-  min-height: 25px;
-}
-.orangeBdr {
-  border: 2px dashed orange;
-  margin: 15px;
-}
-.redBdr {
-  border: 2px solid red;
-  margin: 15px;
-}
-.blueBdr {
-  border: 2px solid blue;
-  margin: 15px;
-}
-.greenBdr {
-  border: 2px solid orchid;
-  margin: 15px;
-}
-@include large-screen {
 }
 </style>

@@ -15,15 +15,15 @@ export const getters = {
     return state.photos.filter((item) => !item.albumId)
   },
   getPhotos: (state) => state.photos,
-  getAlbumPhoto: (state) => (albumId) =>
-    state.photos.filter((photo) => photo.albumId === albumId),
+
+  getAlbum: (state) => (albumId) =>
+    state.albums.find((album) => album.id === albumId),
 }
 export const actions = {
   saveAlbums({ commit }, payload) {
     commit('saveAlbums', payload)
   },
   async getPhotos({ commit }) {
-    console.log('called')
     await this.$photos.get('/photos', createQuery(40)).then((result) => {
       commit('savePhotos', result.data)
       return result.data
@@ -34,7 +34,10 @@ export const actions = {
   },
   movePhoto({ commit }, payload) {
     commit('movePhoto', payload)
-    commit('updatePhotosInAlbums', payload)
+    commit('updatePhotoInAlbums', payload)
+  },
+  addPhotoToAlbum({ commit }, payload) {
+    commit('addPhotoToAlbum', payload)
   },
   async getAlbums({ commit }) {
     return await this.$photos.get('/albums', createQuery(5)).then((result) => {
@@ -76,7 +79,7 @@ export const mutations = {
       photos: albumPhotos,
     })
   },
-  updatePhotosInAlbums(
+  updatePhotoInAlbums(
     state,
     { prevAlbumId = null, newAlbumId = null, photoId }
   ) {
@@ -119,6 +122,27 @@ export const mutations = {
     currentPhoto = { ...currentPhoto, albumId: parseInt(newAlbumId) || null }
 
     state.photos.splice(currentPhotoIndex, 1, currentPhoto)
+  },
+  addPhotoToAlbum(state, { albumId, photos }) {
+    const albumToUpdateIndex = _findIndex(state.albums, 'id', parseInt(albumId))
+    if (albumToUpdateIndex === -1) {
+      return
+    }
+    const albumToUpdate = state.albums[albumToUpdateIndex]
+    const updatedPhotos = state.photos.map((item) => {
+      const shouldBeUpdated = photos.includes(item.id)
+
+      if (shouldBeUpdated) {
+        item.albumId = albumId
+        albumToUpdate.photos.push(item)
+      }
+      return item
+    })
+    state.photos = updatedPhotos
+
+    state.albums = state.albums.map((item) =>
+      item.id !== albumToUpdate.id ? item : albumToUpdate
+    )
   },
   removeAlbum(state, id) {
     state.albums = state.filter((item) => item.id !== id)

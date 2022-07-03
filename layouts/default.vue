@@ -73,4 +73,8 @@ export default {
     }
   }
 }
+.container {
+  padding-top: 2em;
+  padding-bottom: 2em;
+}
 </style>
