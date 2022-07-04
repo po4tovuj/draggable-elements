@@ -17,12 +17,16 @@ export default {
     // lets just check is data were loaded or not if not lets get try to get it
     if (!store.state.photo.albums.length) {
       await store.dispatch('photo/getAlbums').catch((err) => {
-        error(err)
+        err.statusCode
+          ? error({ statusCode: err.statusCode, message: 'Albums not found' })
+          : error({ statusCode: 404, message: 'Albums not found' })
       })
     }
     if (!store.state.photo.photos.length) {
       await store.dispatch('photo/getPhotos').catch((err) => {
-        error(err)
+        err.statusCode
+          ? error({ statusCode: err.statusCode, message: 'Photos not found' })
+          : error({ statusCode: 404, message: 'Photos not found' })
       })
     }
   },

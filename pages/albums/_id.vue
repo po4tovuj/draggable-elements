@@ -48,6 +48,16 @@ import PhotoModal from '~/components/modals/photoModal.vue'
 import PhotoCard from '~/components/PhotoCard.vue'
 export default {
   components: { Card, DropDownBtn, PhotoModal, PhotoCard },
+  beforeRouteEnter(to, from, next) {
+    next((vm) => {
+      if (!vm.getSelectedAlbum) {
+        return vm.$nuxt.error({
+          statusCode: 404,
+          message: "Album doesn't exist",
+        })
+      }
+    })
+  },
   props: {
     id: {
       type: Number,
@@ -61,12 +71,6 @@ export default {
         unsortedList: [],
         selectedPhoto: [],
       },
-
-      // album: {
-      //   id: null,
-      //   title: '',
-      // },
-      // albumId: null,
       showModal: false,
       selected: [],
     }
