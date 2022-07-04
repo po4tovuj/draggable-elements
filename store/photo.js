@@ -15,14 +15,33 @@ export const getters = {
     return state.photos.filter((item) => !item.albumId)
   },
   getPhotos: (state) => state.photos,
-
-  getAlbum: (state) => (albumId) =>
-    state.albums.find((album) => album.id === albumId),
 }
+// error are handled in pages
 export const actions = {
+  //* <----- album actions -----> */
+
   saveAlbums({ commit }, payload) {
     commit('saveAlbums', payload)
   },
+  addPhotoToAlbum({ commit }, payload) {
+    commit('addPhotoToAlbum', payload)
+  },
+  changeAlbumName({ commit }, payload) {
+    commit('changeAlbumName', payload)
+  },
+  async getAlbums({ commit }) {
+    return await this.$photos.get('/albums', createQuery(5)).then((result) => {
+      commit('saveAlbums', result.data)
+      return result.data
+    })
+  },
+
+  //* <----- photos actions -----> */
+
+  sortPhotoInAlbum({ commit }, payload) {
+    commit('sortPhotoInAlbum', payload)
+  },
+
   async getPhotos({ commit }) {
     await this.$photos.get('/photos', createQuery(40)).then((result) => {
       commit('savePhotos', result.data)
@@ -33,39 +52,47 @@ export const actions = {
     commit('savePhotos', payload)
   },
   movePhoto({ commit }, payload) {
+    // lets separate update photoList and album
     commit('movePhoto', payload)
     commit('updatePhotoInAlbums', payload)
   },
-  addPhotoToAlbum({ commit }, payload) {
-    commit('addPhotoToAlbum', payload)
-  },
-  async getAlbums({ commit }) {
-    return await this.$photos.get('/albums', createQuery(5)).then((result) => {
-      commit('saveAlbums', result.data)
-      return result.data
-    })
-  },
-  sortPhotoInAlbum({ commit }, payload) {
-    commit('sortPhotoInAlbum', payload)
-  },
 }
 export const mutations = {
+  /*
+    Because of draggable and to save order we should store data as Array (albums/photos)
+    and for reactive update with saving order use splice method or map
+  */
+
   addAlbum({ albums }, payload) {},
+  // lets be sure that we have initial photo list
   saveAlbums(state, payload) {
     const parsedAlbums = payload.map((item) => ({
       ...item,
-      isAlbum: true,
-      type: 'is-album',
       photos: [],
     }))
     state.albums = parsedAlbums
   },
+
+  changeAlbumName(state, { id, title = 'title' }) {
+    const albumToChangeIndex = _findIndex(state.albums, 'id', parseInt(id))
+
+    const albumToUpdate = state.albums[albumToChangeIndex]
+
+    state.albums = state.albums.map((item) =>
+      item.id !== id
+        ? item
+        : {
+            ...albumToUpdate,
+            title,
+          }
+    )
+  },
   sortAlbums(state, payload) {
     state.albums = payload
   },
+  // if photo was dragg inside album
   sortPhotoInAlbum(state, { albumId, oldIndex, newIndex }) {
     const currentAlbumIndex = _findIndex(state.albums, 'id', parseInt(albumId))
-
     if (currentAlbumIndex === -1) return
     const albumToChange = state.albums[currentAlbumIndex]
     let albumPhotos = albumToChange.photos
@@ -83,6 +110,8 @@ export const mutations = {
     state,
     { prevAlbumId = null, newAlbumId = null, photoId }
   ) {
+    // if we move photo between albums remove photo from prevAlbum
+    // use parseInt as in some cases id's came as string but in store its number
     if (prevAlbumId) {
       const prevAlbumIndex = _findIndex(
         state.albums,
@@ -94,24 +123,28 @@ export const mutations = {
         (item) => item.id !== parseInt(photoId)
       )
     }
+    // if moved to an album from unsorted
     if (newAlbumId) {
       const newAlbumIndex = _findIndex(state.albums, 'id', parseInt(newAlbumId))
       if (newAlbumIndex === -1) return
-      //
-
+      // update photo as well
       const photo = state.photos.find((item) => item.id === parseInt(photoId))
       state.albums[newAlbumIndex].photos.push(photo)
     }
   },
   savePhotos(state, data) {
+    /* initial data is coming with some albumId inside,
+    as it's not real data, lets clear this field
+    */
     data = data.map((item) => ({ ...item, albumId: null }))
     state.photos = data
   },
+  // update photoList with changed order
   sortPhoto(state, payload) {
     state.photos = payload
   },
-
-  movePhoto(state, { prevAlbumId = null, newAlbumId = null, photoId }) {
+  // on move photo update photoList
+  movePhoto(state, { newAlbumId = null, photoId }) {
     const currentPhotoIndex = _findIndex(state.photos, 'id', parseInt(photoId))
 
     if (currentPhotoIndex === -1) {
@@ -123,6 +156,7 @@ export const mutations = {
 
     state.photos.splice(currentPhotoIndex, 1, currentPhoto)
   },
+  // adding photo to album through the modal and manual select
   addPhotoToAlbum(state, { albumId, photos }) {
     const albumToUpdateIndex = _findIndex(state.albums, 'id', parseInt(albumId))
     if (albumToUpdateIndex === -1) {
@@ -130,6 +164,7 @@ export const mutations = {
     }
     const albumToUpdate = state.albums[albumToUpdateIndex]
     const updatedPhotos = state.photos.map((item) => {
+      // update only items which should dbe updated in photos list
       const shouldBeUpdated = photos.includes(item.id)
 
       if (shouldBeUpdated) {
@@ -139,7 +174,7 @@ export const mutations = {
       return item
     })
     state.photos = updatedPhotos
-
+    // update albums as well
     state.albums = state.albums.map((item) =>
       item.id !== albumToUpdate.id ? item : albumToUpdate
     )

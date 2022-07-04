@@ -18,6 +18,8 @@ export default {
     handleClick() {
       console.log('clicked')
       if (typeof this.cb === 'function') {
+        console.log('clicked 3')
+
         return this.$emit('cb')
       }
     },

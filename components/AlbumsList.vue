@@ -10,7 +10,7 @@
       <li
         v-for="el in albums"
         :key="el.id"
-        :class="` album-wrapper`"
+        :class="`album-wrapper`"
         :data-album-id="el.id"
       >
         <Card class="album" :album-id="el.id" :title="el.title">
@@ -21,21 +21,21 @@
           </template>
           <template #body>
             <draggable
-              class="photo-list"
+              class="inner-photo-list"
               :data-album-id="el.id"
               tag="ul"
               :group="innerDragOptions"
               @end="onEnd"
               @change="(e) => handleChange({ e, albumId: el.id })"
             >
-              <li class="photo-list__item drop-zone-area">
+              <li class="drop-zone-area">
                 <drop-down-btn @cb="openModal(el.id, el.title)"></drop-down-btn>
               </li>
               <li
                 v-for="(photo, idx) in el.photos.slice(0, 8)"
                 :key="photo.id + '' + photo.url"
                 :data-photo-id="photo.id"
-                class="photo-list__item"
+                class="inner-photo-list__item"
               >
                 <nuxt-link
                   v-if="idx >= 7"
@@ -73,7 +73,7 @@ import { mapActions, mapGetters } from 'vuex'
 import DropDownBtn from './dropDownBtn.vue'
 import PhotoCard from './PhotoCard.vue'
 import PhotoModal from './modals/photoModal.vue'
-
+// import '~/assets/abstracts/_mixins.scss'
 export default {
   name: 'AlbumsList',
 
@@ -141,7 +141,6 @@ export default {
       this.showModal = true
     },
     handleAddPhoto({ albumId, selectedPhoto }) {
-      console.log('selectedPhoto: ', this.addModal.album.albumId)
       this.showModal = false
       this.addPhotoToAlbum({
         albumId: this.addModal.album.albumId,
@@ -172,15 +171,15 @@ export default {
 </script>
 <style lang="scss" scoped>
 .album-list:deep {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  grid-gap: 20px;
-  &.album-list--column {
-    grid-template-columns: 1fr;
-  }
+  display: flex;
+  flex-wrap: wrap;
+  margin: -15px;
+
   .album-wrapper {
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.12), 0px 1px 1px rgba(0, 0, 0, 0.14),
       0px 2px 1px rgba(0, 0, 0, 0.2);
+    margin: 15px;
+    width: calc(100% - 30px);
   }
   .empty-box {
     height: 100%;
@@ -190,42 +189,23 @@ export default {
     padding: 10px;
     cursor: pointer;
   }
-  .photo-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    grid-template-rows: repeat(auto-fit, minmax(80px, 1fr));
-    // grid-auto-flow: columns;
-    justify-content: center;
+  .inner-photo-list {
+    max-width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    &__item {
+    }
+
     .drop-zone-area {
       display: flex;
       align-items: center;
       justify-content: center;
-      grid-row: 1;
-      grid-column: 1 / 5;
-      cursor: pointer;
-      .drop-btn {
-        cursor: pointer;
-        border-radius: 50%;
-        font-size: 20px;
-        width: 40px;
-        height: 40px;
+      width: 100%;
+      margin-bottom: 10px;
 
-        position: relative;
-        color: rgb(160, 249, 160);
-        border: 2px solid currentColor;
-        &:hover,
-        &:focus {
-          color: white;
-          background-color: rgb(160, 249, 160);
-        }
-        .drop-icon {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          fill: currentColor;
-        }
-      }
+      cursor: pointer;
     }
   }
   .album {
@@ -237,8 +217,6 @@ export default {
     &__link-btn {
       color: inherit;
       padding: 0.75rem 1rem;
-      // display: flex;
-      // align-items: centers;
     }
 
     .card-title {
@@ -251,14 +229,25 @@ export default {
     }
     .photo {
       flex-direction: row;
-      padding: 10px;
       align-items: center;
 
-      .b-image-wrapper {
-        // width: 60px;
-      }
       &__title {
         display: none;
+      }
+    }
+  }
+}
+
+@include large-screen {
+  .album-list:deep {
+    .album-wrapper {
+      width: calc(100% / 3 - 30px);
+    }
+    .inner-photo-list {
+      width: 100%;
+      &__item {
+        width: 90px;
+        margin: 0;
       }
     }
   }

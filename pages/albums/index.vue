@@ -6,24 +6,27 @@
 
 <script>
 import { mapGetters } from 'vuex'
-// import Card from '~/components/Card.vue'
-// import PhotosList from '~/components/PhotosList.vue'
 import AlbumsList from '~/components/AlbumsList.vue'
 
 export default {
   components: {
-    // Card, PhotosList,
     AlbumsList,
   },
-  async fetch({ store, route }) {
-    if (store.state.photo.albums.length) {
-      return
+  async fetch({ store, error }) {
+    // as we are not going to save/edit/delete data with API, only local
+    // lets just check is data were loaded or not if not lets get try to get it
+    if (!store.state.photo.albums.length) {
+      await store.dispatch('photo/getAlbums').catch((err) => {
+        error(err)
+      })
     }
-    await store.dispatch('photo/getAlbums')
+    if (!store.state.photo.photos.length) {
+      await store.dispatch('photo/getPhotos').catch((err) => {
+        error(err)
+      })
+    }
   },
-  data() {
-    return {}
-  },
+
   computed: {
     ...mapGetters({
       albumList: 'photo/getAlbums',
@@ -34,11 +37,11 @@ export default {
 
 <style lang="scss">
 .album-list {
-  grid-template-columns: repeat(auto-fill, minmax(40%, 1fr));
+  // grid-template-columns: repeat(auto-fill, minmax(40%, 1fr));
 
   .photo-list {
-    grid-template-columns: repeat(auto-fit, minmax(40%, 45%));
-    grid-auto-flow: row;
+    // grid-template-columns: repeat(auto-fit, minmax(40%, 45%));
+    // grid-auto-flow: row;
   }
 
   .album {
@@ -48,7 +51,7 @@ export default {
       }
     }
     .photo__title {
-      display: block !important;
+      display: block;
       margin-left: 20px;
       font-size: 18px;
     }
