@@ -6,7 +6,13 @@
     >
       <template #header>
         <b-button @click="addPhoto">Add</b-button>
-        <button type="button" class="delete ml-2" @click="handleClose" />
+        <b-button
+          class="ml-2"
+          type="is-danger"
+          icon-left="close-circle"
+          @click="handleClose"
+        >
+        </b-button>
       </template>
       <template #body>
         <ul class="modal-photo-list">
@@ -14,15 +20,15 @@
             v-for="photo in unsortedList"
             :key="photo.id"
             class="modal-photo-item"
-            @click="selectItem(photo.id)"
           >
             <!-- <div class="photo-check"> -->
-            <div>
-              <b-checkbox v-model="selected" :native-value="photo.id">
-              </b-checkbox>
-            </div>
+            <!-- <div> -->
+            <b-checkbox v-model="selected" :native-value="photo.id">
+            </b-checkbox>
             <!-- </div> -->
-            <photo-card v-bind="photo"> </photo-card>
+            <!-- </div> -->
+            <photo-card v-bind="photo" @click.native="selectItem(photo.id)">
+            </photo-card>
           </li>
         </ul>
       </template>
@@ -82,8 +88,6 @@ export default {
 }
 </style>
 <style lang="scss" scoped>
-.modal-photo:deep {
-}
 .modal-photo-list:deep {
   display: flex;
   flex-direction: column;
@@ -104,4 +108,3 @@ export default {
   }
 }
 </style>
-s

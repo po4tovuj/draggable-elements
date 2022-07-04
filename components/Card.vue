@@ -3,20 +3,6 @@
     <header class="card-header" @click="allowEdit">
       <p class="card-header-title card-title has-text-grey">
         {{ title }}
-        <b-field
-          v-if="isFromSingle"
-          ref="dataEditTitle"
-          class="edit-field edit-field--hidden"
-          label="change name"
-          label-position="on-border"
-        >
-          <b-input v-model="editedTitle" type="text"></b-input>
-          <p class="control">
-            <b-button class="button is-primary" @click="changeAlbumName">
-              Save
-            </b-button>
-          </p>
-        </b-field>
       </p>
 
       <slot name="header"></slot>

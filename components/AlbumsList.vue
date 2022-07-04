@@ -1,14 +1,14 @@
 <template>
   <div class="column">
     <draggable
-      :list="albums"
+      v-model="contents"
       tag="ul"
       :group="outerDragOptions"
       class="album-list"
       :class="{ 'album-list--column': !homePage }"
     >
       <li
-        v-for="el in albums"
+        v-for="el in contents"
         :key="el.id"
         :class="`album-wrapper`"
         :data-album-id="el.id"
@@ -70,9 +70,9 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import DropDownBtn from './dropDownBtn.vue'
+import DropDownBtn from './DropDownBtn.vue'
 import PhotoCard from './PhotoCard.vue'
-import PhotoModal from './modals/photoModal.vue'
+import PhotoModal from './modals/PhotoModal.vue'
 // import '~/assets/abstracts/_mixins.scss'
 export default {
   name: 'AlbumsList',
