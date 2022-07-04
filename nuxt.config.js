@@ -40,9 +40,15 @@ export default {
   ],
   styleResources: {
     // your settings here
-    scss: ['~assets/abstracts/_mixins.scss'],
-    hoistUseStatements: true, // Hoists the "@use" imports. Applies only to "sass", "scss" and "less". Default: false.
+    scss: '~assets/abstracts/_mixins.scss',
+    hoistUseStatements: false, // Hoists the "@use" imports. Applies only to "sass", "scss" and "less". Default: false.
   },
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {},
+  build: {
+    loaders: {
+      sass: {
+        prependData: "@import '~assets/abstracts/_mixins.scss",
+      },
+    },
+  },
 }

@@ -15,6 +15,12 @@ import PhotoCard from './PhotoCard.vue'
 export default {
   name: 'PhotoList',
   components: { PhotoCard },
+  props: {
+    isInAlbums: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       dragOptions: {
@@ -31,16 +37,16 @@ export default {
 
   computed: {
     ...mapGetters({
-      photolist: 'photo/getUnsorted',
+      unsortedList: 'photo/getUnsorted',
     }),
     photos: {
       get() {
-        return this.photolist
+        return this.unsortedList
       },
       set(val) {
         if (
-          this.photolist.length === val.length ||
-          this.photolist.length < val.length
+          this.unsortedList.length === val.length ||
+          this.unsortedList.length < val.length
         ) {
           this.$store.commit('photo/sortPhoto', val)
         }
