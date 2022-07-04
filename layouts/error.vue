@@ -1,6 +1,7 @@
 <template>
   <div class="nuxt-error">
     <component :is="errorPage" :error="error" />
+    <nuxt-link to="/">Home page</nuxt-link>
   </div>
 </template>
 <script>
