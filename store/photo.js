@@ -19,9 +19,16 @@ export const getters = {
 // error are handled in pages
 export const actions = {
   //* <----- album actions -----> */
-
-  saveAlbums({ commit }, payload) {
-    commit('saveAlbums', payload)
+  addAlbum({ commit, dispatch }, payload) {
+    commit('addAlbum', payload)
+    // do nothing if no photos were added
+    const photoIds = payload.photos.map((item) => item.id)
+    if (photoIds.length) {
+      dispatch('addPhotoToAlbum', {
+        albumId: payload.id,
+        photos: payload.photos,
+      })
+    }
   },
   addPhotoToAlbum({ commit }, payload) {
     commit('addPhotoToAlbum', payload)
@@ -34,6 +41,9 @@ export const actions = {
       commit('saveAlbums', result.data)
       return result.data
     })
+  },
+  deleteAlbum({ commit }, id) {
+    commit('deleteAlbum', id)
   },
 
   //* <----- photos actions -----> */
@@ -63,7 +73,9 @@ export const mutations = {
     and for reactive update with saving order use splice method or map
   */
 
-  addAlbum({ albums }, payload) {},
+  addAlbum(state, album) {
+    state.albums = [...state.albums, { ...album, photos: [] }]
+  },
   // lets be sure that we have initial photo list
   saveAlbums(state, payload) {
     const parsedAlbums = payload.map((item) => ({
@@ -86,6 +98,14 @@ export const mutations = {
             title,
           }
     )
+  },
+  deleteAlbum(state, id) {
+    state.albums = state.albums.filter((item) => item.id !== id)
+    state.photos = state.photos.map((item) => {
+      if (item.albumId !== id) return item
+      item.albumId = null
+      return item
+    })
   },
   sortAlbums(state, payload) {
     state.albums = payload

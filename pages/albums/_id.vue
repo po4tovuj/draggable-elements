@@ -1,53 +1,19 @@
 <template>
   <div class="single-album">
-    <Card
-      v-if="getSelectedAlbum"
-      :is-from-single="true"
-      v-bind="getSelectedAlbum"
-      :edit-album-name="editAlbumName"
-    >
-      <template #body>
-        <ul class="photo-list">
-          <li class="drop-zone-area">
-            <drop-down-btn
-              @cb="openModal(getSelectedAlbum.id, getSelectedAlbum.title)"
-            ></drop-down-btn>
-          </li>
-          <li
-            v-for="photo in getSelectedAlbum.photos"
-            :key="photo.id"
-            class="photo-list__item"
-          >
-            <photo-card v-bind="photo"></photo-card>
-          </li>
-        </ul>
-      </template>
-    </Card>
-    <b-modal
-      v-model="showModal"
-      :can-cancel="false"
-      trap-focus
-      :destroy-on-hide="true"
-      aria-role="dialog"
-      aria-label="Add photo to the album"
-      aria-modal
-      scroll="clip"
-    >
-      <template #default>
-        <photo-modal :cb="handleAddPhoto" v-bind="addModal"></photo-modal>
-      </template>
-    </b-modal>
+    <album-form
+      :album="getSelectedAlbum"
+      :unsorted-photo-list="unsortedList"
+      :save-cb="handleSave"
+      :delete-cb="handleDelete"
+    ></album-form>
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import Card from '~/components/Card.vue'
-import DropDownBtn from '~/components/dropDownBtn.vue'
-import PhotoModal from '~/components/modals/photoModal.vue'
-import PhotoCard from '~/components/PhotoCard.vue'
+import AlbumForm from '~/components/AlbumForm.vue'
 export default {
-  components: { Card, DropDownBtn, PhotoModal, PhotoCard },
+  components: { AlbumForm },
   props: {
     id: {
       type: Number,
@@ -56,20 +22,7 @@ export default {
   },
 
   data() {
-    return {
-      addModal: {
-        unsortedList: [],
-        selectedPhoto: [],
-      },
-
-      // album: {
-      //   id: null,
-      //   title: '',
-      // },
-      // albumId: null,
-      showModal: false,
-      selected: [],
-    }
+    return {}
   },
   computed: {
     ...mapGetters({
@@ -88,29 +41,14 @@ export default {
 
   methods: {
     ...mapActions({
-      addPhotoToAlbum: 'photo/addPhotoToAlbum',
       changeAlbumName: 'photo/changeAlbumName',
+      deleteAlbum: 'photo/deleteAlbum',
     }),
-    editAlbumName(data) {
-      this.changeAlbumName(data)
+    handleSave({ id, title }) {
+      this.changeAlbumName({ id, title })
     },
-    openModal(id, title) {
-      this.addModal = {
-        album: {
-          albumId: id,
-          title,
-        },
-        unsortedList: this.unsortedList,
-      }
-
-      this.showModal = true
-    },
-    handleAddPhoto({ selectedPhoto }) {
-      this.showModal = false
-      this.addPhotoToAlbum({
-        albumId: this.addModal.album.albumId,
-        photos: selectedPhoto,
-      })
+    handleDelete(id) {
+      this.deleteAlbum(id)
     },
   },
 }

@@ -32,16 +32,35 @@
         </li>
       </ul>
     </nav>
-    <b-button class="header__create-btn" @click="createAlbum"
-      >Create Album</b-button
+    <b-button class="header__create-btn" @click="showModal = true">
+      Create Album
+    </b-button>
+    <b-modal
+      v-model="showModal"
+      :can-cancel="false"
+      trap-focus
+      :destroy-on-hide="true"
+      aria-role="dialog"
+      aria-label="Create Photo"
+      aria-modal
     >
+      <template #default>
+        <new-album-modal :cb="handleCreateAlbum" :unsorted-list="unsortedList">
+        </new-album-modal>
+      </template>
+    </b-modal>
   </header>
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex'
+import NewAlbumModal from './modals/NewAlbumModal.vue'
 export default {
+  components: { NewAlbumModal },
+
   data() {
     return {
+      showModal: false,
       items: [
         {
           title: 'Home',
@@ -51,16 +70,41 @@ export default {
       ],
     }
   },
+  computed: {
+    ...mapGetters({
+      unsortedList: 'photo/getUnsorted',
+    }),
+  },
+  methods: {
+    ...mapActions({
+      createAlbum: 'photo/addAlbum',
+    }),
+    handleCreateAlbum(album) {
+      this.createAlbum(album)
+    },
+  },
 }
 </script>
 
 <style lang="scss" scoped>
 .header {
+  display: flex;
+  background: #7957d5;
+  align-items: center;
+  padding: 0 20px;
+
   &__create-btn {
     margin-left: auto;
+    background: transparent;
+    color: white;
+    font-size: 20px;
+    border: 0;
+    &:hover,
+    &:focus {
+      color: cyan;
+    }
   }
   .navbar {
-    padding: 0 20px;
   }
   .nav-link-list {
     display: flex;
@@ -69,6 +113,10 @@ export default {
     .nav-link {
       color: white;
       font-size: 20px;
+      &:hover,
+      &--active {
+        color: cyan;
+      }
     }
   }
 }
